@@ -13,7 +13,7 @@ object DatabaseFactory {
 
     fun init(){
         val database = Database.connect(
-            url = "jdbc:postgresql://localhost:5432/noteskt",
+            url = dotenv["DATABASE_URL"],
             driver = "org.postgresql.Driver",
             user = dotenv["DATABASE_USERNAME"],
             password = dotenv["DATABASE_PASSWORD"]
