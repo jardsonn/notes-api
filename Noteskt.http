@@ -1,0 +1,9 @@
+
+#GET http://127.0.0.1:8080/notes
+POST http://127.0.0.1:8080/notes
+Content-Type: application/json
+
+{
+    "title": "Primeira anotação",
+    "content":"Uma anotação simples para testar a API."
+}
