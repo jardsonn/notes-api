@@ -9,7 +9,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
-    private val dotenv = dotenv()
+    private val dotenv = dotenv{
+        this.ignoreIfMissing = true
+    }
 
     fun init(){
         val database = Database.connect(
