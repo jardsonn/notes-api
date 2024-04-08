@@ -11,12 +11,12 @@ data class NoteResponse(
     val title: String,
     val content: String,
     @Serializable(with = LocalDateSerializer::class)
-    val createdIn: LocalDateTime
+    val createdAt: LocalDateTime
 )
 
 fun Note.toNoteResponse() = NoteResponse(
     id.toString(),
     title,
     content,
-    createdIn
+    createdAt
 )

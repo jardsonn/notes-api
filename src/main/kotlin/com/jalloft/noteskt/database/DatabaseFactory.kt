@@ -1,7 +1,6 @@
 package com.jalloft.noteskt.database
 
 import com.jalloft.noteskt.models.Notes
-import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -9,16 +8,12 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
-    private val dotenv = dotenv{
-        this.ignoreIfMissing = true
-    }
-
     fun init(){
         val database = Database.connect(
-            url = dotenv["DATABASE_URL"],
+            url = System.getenv("DATABASE_URL"),
             driver = "org.postgresql.Driver",
-            user = dotenv["DATABASE_USERNAME"],
-            password = dotenv["DATABASE_PASSWORD"]
+            user = System.getenv("DATABASE_USERNAME"),
+            password = System.getenv("DATABASE_PASSWORD")
         )
 
         transaction(database){

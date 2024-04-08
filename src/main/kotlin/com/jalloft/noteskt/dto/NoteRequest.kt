@@ -1,16 +1,16 @@
 package com.jalloft.noteskt.dto
 
 import com.jalloft.noteskt.models.Note
-import com.jalloft.noteskt.serialization.LocalDateSerializer
+import com.jalloft.noteskt.serialization.UUIDSerializer
 import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
+import java.util.*
 
 @Serializable
 data class NoteRequest(
     val title: String,
     val content: String,
-    @Serializable(with = LocalDateSerializer::class)
-    val createdIn: LocalDateTime = LocalDateTime.now()
+    @Serializable(with = UUIDSerializer::class)
+    val userId: UUID? = null,
 ) {
-    fun toNote() = Note(title = title, content = content, createdIn = createdIn)
+    fun toNote() = Note(title = title, content = content, userId = userId)
 }
