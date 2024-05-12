@@ -9,4 +9,5 @@ class UserRepository(
 ) {
     suspend fun findUserByEmail(email: String) = dao.findUserByEmail(email)
     suspend fun saveUser(user: User) = dao.saveUser(user)
+    suspend fun isEmailAlreadyRegistered(email: String) = dao.isEmailAlreadyRegistered(email)
 }

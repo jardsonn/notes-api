@@ -5,6 +5,7 @@ import com.jalloft.noteskt.models.User
 import com.jalloft.noteskt.models.Users
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 class UserDaoImpl : UserDao {
     override suspend fun findUserByEmail(email: String): User? = DatabaseFactory.dbQuery {
@@ -22,5 +23,10 @@ class UserDaoImpl : UserDao {
             it[salt] = user.salt
         }
         insertStatement.resultedValues.orEmpty().isNotEmpty()
+    }
+
+    override suspend fun isEmailAlreadyRegistered(email: String): Boolean = newSuspendedTransaction {
+        Users.selectAll().where { Users.email eq email }
+            .count() > 0
     }
 }

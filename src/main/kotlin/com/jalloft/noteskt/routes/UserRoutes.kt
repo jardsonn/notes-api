@@ -9,6 +9,7 @@ import com.jalloft.noteskt.security.hashing.SaltedHash
 import com.jalloft.noteskt.security.token.TokenClaim
 import com.jalloft.noteskt.security.token.TokenConfig
 import com.jalloft.noteskt.security.token.TokenService
+import com.jalloft.noteskt.utils.FieldValidator
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -25,12 +26,34 @@ fun Route.signUp(
     post("signup"){
         val request = call.receive<AuthRequest>()
 
-        val areFieldsBlank = request.email.isBlank() || request.password.isBlank()
-        val isPwTooShort = request.password.length < 8
-        if(areFieldsBlank || isPwTooShort) {
-            call.respond(HttpStatusCode.Conflict)
+
+        if (request.email.isBlank()){
+            call.respond(HttpStatusCode.BadRequest, "O campo e-mail não pode ser vazio.")
             return@post
         }
+
+        if (request.password.isBlank()){
+            call.respond(HttpStatusCode.BadRequest, "O campo de senha não pode ser vazio.")
+            return@post
+        }
+
+        if (!FieldValidator.isValidEmail(request.email)){
+            call.respond(HttpStatusCode.BadRequest, "O e-mail fornecido não é válido. Por favor, insira um e-mail válido.")
+            return@post
+        }
+
+        if (!FieldValidator.isValidPassword(request.password)){
+            call.respond(HttpStatusCode.BadRequest, "A senha é muito curta. Por favor, insira uma senha com pelo menos 8 caracteres.")
+            return@post
+        }
+
+        val isEmailAlreadyRegistered = repo.isEmailAlreadyRegistered(request.email)
+
+        if (isEmailAlreadyRegistered){
+            call.respond(HttpStatusCode.Conflict, "Esse e-mail já está cadastrado. Faça login.")
+            return@post
+        }
+
 
         val saltedHash = hashingService.generateSaltedHash(request.password)
         val user = User(
@@ -40,7 +63,7 @@ fun Route.signUp(
         )
         val wasAcknowledged = repo.saveUser(user)
         if(!wasAcknowledged)  {
-            call.respond(HttpStatusCode.Conflict)
+            call.respond(HttpStatusCode.BadRequest)
             return@post
         }
 
@@ -59,7 +82,7 @@ fun Route.signIn(
 
         val user = repo.findUserByEmail(request.email)
         if(user == null) {
-            call.respond(HttpStatusCode.Conflict, "Incorrect username or password")
+            call.respond(HttpStatusCode.BadRequest, "Seu e-mail ou senha está incorreto.")
             return@post
         }
 
@@ -72,7 +95,7 @@ fun Route.signIn(
         )
         if(!isValidPassword) {
             println("Entered hash: ${DigestUtils.sha256Hex("${user.salt}${request.password}")}, Hashed PW: ${user.password}")
-            call.respond(HttpStatusCode.Conflict, "Incorrect username or password")
+            call.respond(HttpStatusCode.BadRequest, "Seu e-mail ou senha está incorreto.")
             return@post
         }
 

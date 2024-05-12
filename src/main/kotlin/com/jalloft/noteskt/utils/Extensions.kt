@@ -8,3 +8,4 @@ fun String.toUUID(): UUID? =
     } catch (_: Throwable) {
         null
     }
+
