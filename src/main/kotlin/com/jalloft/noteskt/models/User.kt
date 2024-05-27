@@ -5,6 +5,7 @@ import java.util.*
 
 data class User(
     val id: UUID = UUID.randomUUID(),
+    val name: String,
     val email: String,
     val password: String,
     val salt: String,
@@ -13,6 +14,7 @@ data class User(
 object Users: Table(){
     val id = uuid("id").autoGenerate()
     val email = varchar("email", 255)
+    val name = varchar("name", 255)
     val password = varchar("password", 255)
     val salt = varchar("salt", 128)
 

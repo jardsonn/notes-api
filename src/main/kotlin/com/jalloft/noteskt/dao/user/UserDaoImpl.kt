@@ -11,13 +11,14 @@ class UserDaoImpl : UserDao {
     override suspend fun findUserByEmail(email: String): User? = DatabaseFactory.dbQuery {
         Users.selectAll()
             .where { Users.email eq email }
-            .map { User(it[Users.id], it[Users.email], it[Users.password], it[Users.salt]) }
+            .map { User(it[Users.id], it[Users.name],  it[Users.email], it[Users.password], it[Users.salt]) }
             .singleOrNull()
     }
 
     override suspend fun saveUser(user: User) = DatabaseFactory.dbQuery {
         val insertStatement = Users.insert {
             it[id] = user.id
+            it[name] = user.name
             it[email] = user.email
             it[password] = user.password
             it[salt] = user.salt

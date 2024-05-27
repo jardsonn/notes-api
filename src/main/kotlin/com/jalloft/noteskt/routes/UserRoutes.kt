@@ -1,7 +1,8 @@
 package com.jalloft.noteskt.routes
 
-import com.jalloft.noteskt.dto.AuthRequest
 import com.jalloft.noteskt.dto.AuthResponse
+import com.jalloft.noteskt.dto.SignInRequest
+import com.jalloft.noteskt.dto.SignUpRequest
 import com.jalloft.noteskt.models.User
 import com.jalloft.noteskt.repository.UserRepository
 import com.jalloft.noteskt.security.hashing.HashingService
@@ -24,7 +25,7 @@ fun Route.signUp(
     repo: UserRepository
 ){
     post("signup"){
-        val request = call.receive<AuthRequest>()
+        val request = call.receive<SignUpRequest>()
 
 
         if (request.email.isBlank()){
@@ -57,13 +58,14 @@ fun Route.signUp(
 
         val saltedHash = hashingService.generateSaltedHash(request.password)
         val user = User(
+            name = request.name,
             email = request.email,
             password = saltedHash.hash,
             salt = saltedHash.salt
         )
         val wasAcknowledged = repo.saveUser(user)
         if(!wasAcknowledged)  {
-            call.respond(HttpStatusCode.BadRequest)
+            call.respond(HttpStatusCode.BadRequest, "Ocorreu um erro. Por favor, tente novamente mais tarde.")
             return@post
         }
 
@@ -78,7 +80,7 @@ fun Route.signIn(
     tokenConfig: TokenConfig
 ) {
     post("signin") {
-        val request = call.receive<AuthRequest>()
+        val request = call.receive<SignInRequest>()
 
         val user = repo.findUserByEmail(request.email)
         if(user == null) {

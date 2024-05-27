@@ -12,6 +12,7 @@ plugins {
     kotlin("jvm") version "1.9.23"
     id("io.ktor.plugin") version "2.3.9"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
+    id ("org.flywaydb.flyway") version "8.5.4"
 }
 
 group = "noteskt.jalloft.com"
@@ -46,12 +47,13 @@ dependencies {
 
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
 
-
     implementation("io.github.cdimascio:dotenv-kotlin:$dotenv_version")
 
     implementation("commons-codec:commons-codec:$commons_codec_version")
 
+    implementation("org.flywaydb:flyway-core:9.22.3")
 
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
+
