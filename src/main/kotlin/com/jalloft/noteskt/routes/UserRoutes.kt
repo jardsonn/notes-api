@@ -3,6 +3,7 @@ package com.jalloft.noteskt.routes
 import com.jalloft.noteskt.dto.AuthResponse
 import com.jalloft.noteskt.dto.SignInRequest
 import com.jalloft.noteskt.dto.SignUpRequest
+import com.jalloft.noteskt.dto.toUserResponse
 import com.jalloft.noteskt.models.User
 import com.jalloft.noteskt.repository.UserRepository
 import com.jalloft.noteskt.security.hashing.HashingService
@@ -22,7 +23,9 @@ import org.apache.commons.codec.digest.DigestUtils
 
 fun Route.signUp(
     hashingService: HashingService,
-    repo: UserRepository
+    repo: UserRepository,
+    tokenService: TokenService,
+    tokenConfig: TokenConfig
 ){
     post("signup"){
         val request = call.receive<SignUpRequest>()
@@ -69,7 +72,21 @@ fun Route.signUp(
             return@post
         }
 
-        call.respond(HttpStatusCode.OK)
+        val token = tokenService.generate(
+            config = tokenConfig,
+            TokenClaim(
+                name = "userId",
+                value = user.id.toString()
+            )
+        )
+
+        call.respond(
+            status = HttpStatusCode.OK,
+            message = AuthResponse(
+                token = token,
+                userResponse = user.toUserResponse()
+            )
+        )
     }
 }
 
@@ -112,7 +129,8 @@ fun Route.signIn(
         call.respond(
             status = HttpStatusCode.OK,
             message = AuthResponse(
-                token = token
+                token = token,
+                userResponse = user.toUserResponse()
             )
         )
     }
