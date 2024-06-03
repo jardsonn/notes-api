@@ -1,9 +1,11 @@
 package com.jalloft.noteskt.routes
 
-import com.jalloft.noteskt.dto.AuthResponse
-import com.jalloft.noteskt.dto.SignInRequest
-import com.jalloft.noteskt.dto.SignUpRequest
-import com.jalloft.noteskt.dto.toUserResponse
+import com.jalloft.noteskt.dto.user.AuthResponse
+import com.jalloft.noteskt.dto.user.SignInRequest
+import com.jalloft.noteskt.dto.user.SignUpRequest
+import com.jalloft.noteskt.dto.error.AuthenticationErrorCodes
+import com.jalloft.noteskt.dto.error.ErrorResponse
+import com.jalloft.noteskt.dto.user.toUserResponse
 import com.jalloft.noteskt.models.User
 import com.jalloft.noteskt.repository.UserRepository
 import com.jalloft.noteskt.security.hashing.HashingService
@@ -19,42 +21,62 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.apache.commons.codec.digest.DigestUtils
 
 fun Route.signUp(
     hashingService: HashingService,
     repo: UserRepository,
     tokenService: TokenService,
     tokenConfig: TokenConfig
-){
-    post("signup"){
+) {
+    post("signup") {
         val request = call.receive<SignUpRequest>()
 
 
-        if (request.email.isBlank()){
-            call.respond(HttpStatusCode.BadRequest, "O campo e-mail não pode ser vazio.")
+        if (request.email.isBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(AuthenticationErrorCodes.EMAIL_EMPTY, "O campo e-mail não pode ser vazio.")
+            )
             return@post
         }
 
-        if (request.password.isBlank()){
-            call.respond(HttpStatusCode.BadRequest, "O campo de senha não pode ser vazio.")
+        if (request.password.isBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(AuthenticationErrorCodes.PASSWORD_EMPTY, "O campo de senha não pode ser vazio.")
+            )
             return@post
         }
 
-        if (!FieldValidator.isValidEmail(request.email)){
-            call.respond(HttpStatusCode.BadRequest, "O e-mail fornecido não é válido. Por favor, insira um e-mail válido.")
+        if (!FieldValidator.isValidEmail(request.email)) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    AuthenticationErrorCodes.INVALID_EMAIL,
+                    "O e-mail fornecido não é válido. Por favor, insira um e-mail válido."
+                )
+            )
             return@post
         }
 
-        if (!FieldValidator.isValidPassword(request.password)){
-            call.respond(HttpStatusCode.BadRequest, "A senha é muito curta. Por favor, insira uma senha com pelo menos 8 caracteres.")
+        if (!FieldValidator.isValidPassword(request.password)) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    AuthenticationErrorCodes.INVALID_PASSWORD,
+                    "A senha é muito curta. Por favor, insira uma senha com pelo menos 8 caracteres."
+                )
+            )
             return@post
         }
 
         val isEmailAlreadyRegistered = repo.isEmailAlreadyRegistered(request.email)
 
-        if (isEmailAlreadyRegistered){
-            call.respond(HttpStatusCode.Conflict, "Esse e-mail já está cadastrado. Faça login.")
+        if (isEmailAlreadyRegistered) {
+            call.respond(
+                HttpStatusCode.Conflict,
+                ErrorResponse(AuthenticationErrorCodes.EMAIL_ALREADY_REGISTERED, "Esse e-mail já está cadastrado. Faça login.")
+            )
             return@post
         }
 
@@ -67,8 +89,14 @@ fun Route.signUp(
             salt = saltedHash.salt
         )
         val wasAcknowledged = repo.saveUser(user)
-        if(!wasAcknowledged)  {
-            call.respond(HttpStatusCode.BadRequest, "Ocorreu um erro. Por favor, tente novamente mais tarde.")
+        if (!wasAcknowledged) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    AuthenticationErrorCodes.GENERIC_ERROR,
+                    "Ocorreu um erro. Por favor, tente novamente mais tarde."
+                )
+            )
             return@post
         }
 
@@ -100,8 +128,11 @@ fun Route.signIn(
         val request = call.receive<SignInRequest>()
 
         val user = repo.findUserByEmail(request.email)
-        if(user == null) {
-            call.respond(HttpStatusCode.BadRequest, "Seu e-mail ou senha está incorreto.")
+        if (user == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(AuthenticationErrorCodes.CREDENTIALS_INCORRECT, "Seu e-mail ou senha está incorreto.")
+            )
             return@post
         }
 
@@ -112,9 +143,11 @@ fun Route.signIn(
                 salt = user.salt
             )
         )
-        if(!isValidPassword) {
-            println("Entered hash: ${DigestUtils.sha256Hex("${user.salt}${request.password}")}, Hashed PW: ${user.password}")
-            call.respond(HttpStatusCode.BadRequest, "Seu e-mail ou senha está incorreto.")
+        if (!isValidPassword) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(AuthenticationErrorCodes.CREDENTIALS_INCORRECT, "Seu e-mail ou senha está incorreto.")
+            )
             return@post
         }
 

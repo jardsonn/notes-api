@@ -1,4 +1,4 @@
-package com.jalloft.noteskt.dto
+package com.jalloft.noteskt.dto.note
 
 import com.jalloft.noteskt.models.Note
 import com.jalloft.noteskt.serialization.UUIDSerializer

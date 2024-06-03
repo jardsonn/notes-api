@@ -1,4 +1,4 @@
-package com.jalloft.noteskt.dto
+package com.jalloft.noteskt.dto.user
 
 import kotlinx.serialization.Serializable
 
