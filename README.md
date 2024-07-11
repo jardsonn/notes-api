@@ -1,6 +1,6 @@
 # API de Bloco de Notas com Autenticação
 
-Este projeto é uma API de bloco de notas desenvolvida em Kotlin utilizando o framework Ktor. A API permite a criação, leitura, atualização e exclusão de notas, com funcionalidades de autenticação para garantir a segurança dos dados dos usuários.
+Este projeto é uma API de bloco de notas desenvolvida em Kotlin utilizando o framework Ktor. A API permite a criação, leitura, atualização e exclusão de notas, com funcionalidades de autenticação para garantir a segurança dos dados dos usuários. O [OnNotes](https://github.com/jardsonn/OnNotes) é um aplicativo Android que utiliza esta API como backend para gerenciar notas de forma eficiente e segura.
 
 ## Funcionalidades
 
